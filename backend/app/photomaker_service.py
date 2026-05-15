@@ -52,6 +52,7 @@ class PhotoMakerService:
         payload = {
             "model": settings.openrouter_model,
             "messages": [{"role": "user", "content": content_parts}],
+            "modalities": ["image", "text"],
             "max_tokens": 1024,
         }
 
@@ -92,9 +93,16 @@ class PhotoMakerService:
             raise RuntimeError("API returned no choices.")
 
         message = result["choices"][0].get("message", {})
-        content = message.get("content", "")
 
-        return self._extract_image(content)
+        # OpenRouter image generation returns images in message["images"]
+        images = message.get("images") or []
+        if images:
+            url = images[0].get("image_url", {}).get("url", "")
+            if url:
+                return self._download_image(url)
+
+        # Fallback: try to parse image URL from text content
+        return self._extract_image(message.get("content", ""))
 
     def _extract_image(self, content) -> Image.Image:
         if isinstance(content, list):

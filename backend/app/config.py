@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # OpenRouter inference
     openrouter_api_key: str = ""
-    openrouter_model: str = "openai/gpt-4o"
+    openrouter_model: str = "google/gemini-2.5-flash-image"
 
     target_image_size: int = 384
 
